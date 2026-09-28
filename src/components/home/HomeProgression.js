@@ -35,7 +35,6 @@ export default function HomeProgression() {
                         : "Build your party, earn XP from completed quests, and collect milestone achievement badges as you collaborate across roles. Our matchmaking system makes finding your dream team for GEMASTIK & INVENTION 2026 as rewarding as clearing the next game level."}
                 </p>
 
-                {/* ✦ FITUR TECH STACK ALA CODEDEX ✦ */}
                 <div className="flex flex-col gap-2.5 pt-2">
                     <span className="font-pixel text-[8.5px] text-yellow-400 uppercase tracking-wider">
                         {lang === "ID" ? "// TECH STACK & BAHASA DIDUKUNG:" : "// SUPPORTED TECH STACKS & LANGUAGES:"}
