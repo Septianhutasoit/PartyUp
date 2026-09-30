@@ -16,6 +16,8 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [university, setUniversity] = useState("Universitas Indonesia");
   const [major, setMajor] = useState("Informatics");
+  // PERBAIKAN: semester sekarang state dinamis (dulu di-hardcode 3 saat submit)
+  const [semester, setSemester] = useState(1);
   const [selectedRole, setSelectedRole] = useState("Full-stack Developer");
   const [skills, setSkills] = useState("");
   const [bio, setBio] = useState("");
@@ -57,7 +59,9 @@ export default function Register() {
         user_id: `USR-${Math.floor(100 + Math.random() * 900)}`,
         name: name.trim(),
         password: password.trim() || `${name.trim().toLowerCase()}123`,
-        semester: 3,
+        // PERBAIKAN: sebelumnya hardcode `semester: 3` — sekarang ambil dari
+        // pilihan dropdown user, fallback ke 1 kalau entah kenapa kosong.
+        semester: Number(semester) || 1,
         university,
         major,
         role: selectedRole, // Menyimpan pilihan kelas RPG
@@ -266,8 +270,8 @@ export default function Register() {
                 />
               </div>
 
-              {/* University & Prodi */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* University, Prodi & Semester — sekarang 3 kolom */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="flex flex-col gap-1">
                   <label className="font-pixel text-[8px] text-gray-600">
                     {lang === "ID" ? "GUILD (UNIVERSITAS)" : "GUILD (UNIVERSITY)"}
@@ -297,6 +301,23 @@ export default function Register() {
                     <option value="Information Systems">Information Systems</option>
                     <option value="Computer Science">Computer Science</option>
                     <option value="Business Management">Business Management</option>
+                  </select>
+                </div>
+                {/* PERBAIKAN: dropdown Semester baru, sejajar University & Major */}
+                <div className="flex flex-col gap-1">
+                  <label className="font-pixel text-[8px] text-gray-600">
+                    {lang === "ID" ? "SEMESTER" : "SEMESTER"}
+                  </label>
+                  <select
+                    value={semester}
+                    onChange={(e) => setSemester(Number(e.target.value))}
+                    className="font-sans text-xs p-2.5 bg-slate-50 border-2 border-slate-300 rounded-lg focus:border-retro-black focus:outline-none cursor-pointer"
+                  >
+                    {Array.from({ length: 8 }, (_, i) => i + 1).map((sem) => (
+                      <option key={sem} value={sem}>
+                        {lang === "ID" ? `Semester ${sem}` : `Semester ${sem}`}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -351,8 +372,8 @@ export default function Register() {
                         key={role.name}
                         onClick={() => setSelectedRole(role.name)}
                         className={`font-pixel text-[7px] leading-tight text-center px-1.5 py-2.5 border-2 rounded-lg cursor-pointer select-none transition-all ${isSelected
-                            ? "bg-navy-blue border-retro-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] translate-x-[1px] translate-y-[1px]"
-                            : "bg-slate-50 border-slate-300 text-retro-black hover:border-retro-black hover:bg-slate-100"
+                          ? "bg-navy-blue border-retro-black text-white shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] translate-x-[1px] translate-y-[1px]"
+                          : "bg-slate-50 border-slate-300 text-retro-black hover:border-retro-black hover:bg-slate-100"
                           }`}
                       >
                         {role.name.toUpperCase()}
