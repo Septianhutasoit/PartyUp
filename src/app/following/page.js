@@ -279,7 +279,6 @@ export default function Following() {
         try {
           const parsed = JSON.parse(localPosts);
           if (Array.isArray(parsed)) {
-            // ✅ SINKRONISASI OTOMATIS: Selalu perbarui URL gambar dari INITIAL_POSTS terbaru
             const syncedPosts = INITIAL_POSTS.map((initPost) => {
               const existing = parsed.find((p) => p.id === initPost.id);
               if (existing) {
@@ -288,13 +287,12 @@ export default function Following() {
                   likes: existing.likes ?? initPost.likes,
                   isLiked: existing.isLiked ?? initPost.isLiked,
                   comments: existing.comments ?? initPost.comments,
-                  image: initPost.image, // Pastikan gambar SELALU memakai yang terbaru dari folder project
+                  image: initPost.image,
                 };
               }
               return initPost;
             });
 
-            // Menyimpan juga postingan baru buatan user sendiri jika ada
             const customUserPosts = parsed.filter(
               (p) => !INITIAL_POSTS.some((init) => init.id === p.id)
             );
@@ -498,9 +496,7 @@ export default function Following() {
     );
   };
 
-  // =========================================================
-  // VIEW 1: DEDICATED FULL ARTICLE VIEW (TANPA NAVBAR UTAMA)
-  // =========================================================
+ 
   if (selectedPost) {
     const author = getAuthor(selectedPost.author_id);
     const authorLevel = calculateUserLevel(author);
@@ -529,9 +525,7 @@ export default function Following() {
     );
   }
 
-  // =========================================================
-  // VIEW 2: FEED GRID 3-KOLOM (DENGAN HEADER & FOOTER)
-  // =========================================================
+  
   return (
     <div className="bg-[#0c1322] min-h-screen text-white flex flex-col font-sans overflow-x-hidden selection:bg-yellow-400 selection:text-black">
       <Header />
