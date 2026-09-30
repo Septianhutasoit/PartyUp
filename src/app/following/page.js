@@ -21,13 +21,10 @@ const getDefaultPostBanner = (content = "") => {
   return "/bg4.gif";
 };
 
-// =========================================================================
-// DATASET 9 ARTIKEL PROYEK LENGKAP (3 BARIS X 3 KOLOM)
-// =========================================================================
 const INITIAL_POSTS = [
   {
     id: "post-1",
-    author_id: "USR-002", // Alex
+    author_id: "USR-002", 
     title: "Building a High-Throughput Carbon Engine with Python & Go",
     category: "BACKEND",
     level: "INTERMEDIATE",
@@ -35,7 +32,7 @@ const INITIAL_POSTS = [
     content: "The EcoSphere carbon-calculator engine is fully optimized! 1,000 computation nodes execute in under 3ms with zero latency drift. Still looking for a UI/UX Designer teammate to finalize the competition presentation slides. Check my open quests on the board!",
     prerequisites: "Python 3.11, Docker, REST API Fundamentals",
     codeSnippet: "def calculate_carbon_footprint(nodes, energy_factor):\n    # Optimized 3ms vector calculation\n    return [node.emission * energy_factor for node in nodes]",
-    image: "/computer.png",
+    image: "/project/alex1.png",
     likes: 24,
     isLiked: false,
     timestamp: "Aug 24, 2026",
@@ -59,7 +56,7 @@ const INITIAL_POSTS = [
     content: "Just published the complete design system and hi-fi mobile prototype for ScholarSave. Handcrafted 48 custom retro pixelated icons and responsive typography tokens. Inspect the case study in my Showcase portfolio!",
     prerequisites: "Figma Variables, Auto-layout v5, Design Tokens",
     codeSnippet: ":root {\n  --color-pixel-green: #00FF00;\n  --shadow-retro: 4px 4px 0px #000000;\n}",
-    image: "/bg.png",
+    image: "/project/scholarsave.png",
     likes: 42,
     isLiked: false,
     timestamp: "Aug 22, 2026",
@@ -76,7 +73,7 @@ const INITIAL_POSTS = [
     content: "Drafted the Business Model Canvas & Sprint Roadmap for the EduQuest flashcard ecosystem. Next sprint milestone: finalizing backend SQL schemas and automated unit tests. Let's aim for the championship! 🚀",
     prerequisites: "Scrum Methodology, Product Backlog Management",
     codeSnippet: "// Sprint Milestone 02\n- [x] Database Schema Verification\n- [ ] Automated Unit Testing Suite\n- [ ] Pitch Deck Finalization",
-    image: "/bg2.gif",
+    image: "/project/agile.png",
     likes: 19,
     isLiked: false,
     timestamp: "Aug 20, 2026",
@@ -100,14 +97,14 @@ const INITIAL_POSTS = [
     content: "Integrated real-time Bluetooth telemetry in MediLink. Testing cross-platform hardware responsiveness across Android & iOS devices. Ready for GEMASTIK 2026 deployment! 📱",
     prerequisites: "Flutter SDK 3.x, Flutter Blue Plus, BLE Protocols",
     codeSnippet: "FlutterBluePlus.scanResults.listen((results) {\n  for (ScanResult r in results) {\n    print('${r.device.remoteId}: ${r.rssi}');\n  }\n});",
-    image: "/bg3.gif",
+    image: "/project/telemetry.png",
     likes: 31,
     isLiked: false,
     timestamp: "Aug 18, 2026",
     tags: ["#MobileDev", "#GEMASTIK", "#Flutter"],
     comments: []
   },
-  // KARTU BARU 1: UI/UX Accessibility
+  // KARTU 5: UI/UX Accessibility
   {
     id: "post-5",
     author_id: "USR-001", // Joice
@@ -118,7 +115,7 @@ const INITIAL_POSTS = [
     content: "Published an open-source accessibility design guideline for student web designers. Features WCAG AAA high-contrast ratios, smooth focus rings, and zero motion sickness triggers for 8-bit retro interfaces.",
     prerequisites: "Tailwind CSS v4, WCAG 2.1 Guidelines, Figma Tokens",
     codeSnippet: "@utility focus-ring {\n  outline: 2px solid #00FF00;\n  outline-offset: 2px;\n  transition: outline-offset 0.15s ease;\n}",
-    image: "/bg.png",
+    image: "/project/micro.png",
     likes: 37,
     isLiked: false,
     timestamp: "Aug 16, 2026",
@@ -132,7 +129,7 @@ const INITIAL_POSTS = [
       }
     ]
   },
-  // KARTU BARU 2: DevOps CI/CD
+  // KARTU 6: DevOps CI/CD
   {
     id: "post-6",
     author_id: "USR-002", // Alex
@@ -143,7 +140,7 @@ const INITIAL_POSTS = [
     content: "Architected an automated testing and deployment workflow for our hackathon prototype. Every push to main runs linting, integration suites, and deploys production containers in 45 seconds.",
     prerequisites: "Docker Compose, GitHub Actions, Linux Shell Scripting",
     codeSnippet: "name: Guild CI/CD\non: [push]\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: docker compose up -d --build",
-    image: "/computer.png",
+    image: "/project/cloud.png",
     likes: 53,
     isLiked: false,
     timestamp: "Aug 14, 2026",
@@ -157,7 +154,7 @@ const INITIAL_POSTS = [
       }
     ]
   },
-  // KARTU BARU 3: UX Research & SUS Scoring
+  // KARTU 7: UX Research & SUS Scoring
   {
     id: "post-7",
     author_id: "USR-003", // Sarah
@@ -168,14 +165,14 @@ const INITIAL_POSTS = [
     content: "Conducted usability testing across 25 IT college students for the EduQuest flashcard project. Achieved a System Usability Scale (SUS) score of 88.5/100. Check the full report and heuristic analysis!",
     prerequisites: "User Research Basics, Google Forms, SUS Calculator",
     codeSnippet: "// SUS Calculation Formula\nconst susScore = (oddSum - 5 + (25 - evenSum)) * 2.5;\nconsole.log(`Usability Grade: A+ (${susScore}/100)`);",
-    image: "/bg4.gif",
+    image: "/project/businees.png",
     likes: 29,
     isLiked: false,
     timestamp: "Aug 12, 2026",
     tags: ["#ProductManagement", "#GEMASTIK"],
     comments: []
   },
-  // KARTU BARU 4: High-Performance Go WebSockets
+  // KARTU 8: High-Performance Go WebSockets
   {
     id: "post-8",
     author_id: "USR-004", // Kevin
@@ -186,7 +183,7 @@ const INITIAL_POSTS = [
     content: "Engineered a concurrent WebSocket server in Go handling 50,000 active real-time socket connections with only 35MB memory footprint. Perfect for multiplayer hackathon games and live team chats!",
     prerequisites: "Golang 1.22, Goroutines, WebSocket RFC 6455",
     codeSnippet: "func handleConnections(w http.ResponseWriter, r *http.Request) {\n    ws, err := upgrader.Upgrade(w, r, nil)\n    defer ws.Close()\n    clients[ws] = true\n}",
-    image: "/computer.png",
+    image: "/project/telemetry.png",
     likes: 48,
     isLiked: false,
     timestamp: "Aug 10, 2026",
@@ -200,7 +197,7 @@ const INITIAL_POSTS = [
       }
     ]
   },
-  // KARTU BARU 5: Retro Game Dev Canvas
+  // KARTU 9: Retro Game Dev Canvas
   {
     id: "post-9",
     author_id: "USR-002", // Alex
@@ -211,7 +208,7 @@ const INITIAL_POSTS = [
     content: "Built a lightweight 2D grid-based dungeon crawler engine from scratch without external dependencies. 60 FPS smooth collision handling, A* pathfinding, and custom pixel-art sprite rendering.",
     prerequisites: "TypeScript, HTML5 Canvas API, Vector Math",
     codeSnippet: "class TileMap {\n  draw(ctx: CanvasRenderingContext2D) {\n    this.tiles.forEach(t => ctx.drawImage(t.sprite, t.x, t.y));\n  }\n}",
-    image: "/bg2.gif",
+    image: "/project/EcoSphere.png",
     likes: 64,
     isLiked: false,
     timestamp: "Aug 08, 2026",
@@ -281,15 +278,37 @@ export default function Following() {
       if (localPosts) {
         try {
           const parsed = JSON.parse(localPosts);
-          // Jika data di local storage kurang dari 9, gabungkan agar lengkap
-          if (Array.isArray(parsed) && parsed.length >= INITIAL_POSTS.length) {
-            setPosts(parsed);
+          if (Array.isArray(parsed)) {
+            // ✅ SINKRONISASI OTOMATIS: Selalu perbarui URL gambar dari INITIAL_POSTS terbaru
+            const syncedPosts = INITIAL_POSTS.map((initPost) => {
+              const existing = parsed.find((p) => p.id === initPost.id);
+              if (existing) {
+                return {
+                  ...initPost,
+                  likes: existing.likes ?? initPost.likes,
+                  isLiked: existing.isLiked ?? initPost.isLiked,
+                  comments: existing.comments ?? initPost.comments,
+                  image: initPost.image, // Pastikan gambar SELALU memakai yang terbaru dari folder project
+                };
+              }
+              return initPost;
+            });
+
+            // Menyimpan juga postingan baru buatan user sendiri jika ada
+            const customUserPosts = parsed.filter(
+              (p) => !INITIAL_POSTS.some((init) => init.id === p.id)
+            );
+
+            const finalPosts = [...customUserPosts, ...syncedPosts];
+            setPosts(finalPosts);
+            localStorage.setItem("timelinePosts", JSON.stringify(finalPosts));
           } else {
             setPosts(INITIAL_POSTS);
             localStorage.setItem("timelinePosts", JSON.stringify(INITIAL_POSTS));
           }
         } catch (e) {
           console.error(e);
+          setPosts(INITIAL_POSTS);
         }
       } else {
         localStorage.setItem("timelinePosts", JSON.stringify(INITIAL_POSTS));
