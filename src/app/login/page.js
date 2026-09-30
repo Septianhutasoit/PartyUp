@@ -1,139 +1,56 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import usersData from "../../data/users.json";
-import PixelAvatar from "../../components/PixelAvatar";
-import { getStoredUsers } from "../../utils/auth";
+import { getStoredUsers, isAdmin } from "../../utils/auth";
 import { useLanguage } from "../../utils/lang";
 
-// DAFTAR PINTASAN AKUN DEMO UNTUK PENGUJIAN JURI
+// AKUN DEMO KHUSUS PENGUJIAN JURI (TERLIPAT SECARA DEFAULT)
 const DEMO_PERSONAS = [
   {
     name: "Joice",
     role: "UI/UX Designer",
-    tag: "Ketua Tim (Leader)",
+    tagId: "Ketua Tim",
+    tagEn: "Team Leader",
     avatar: "🎨",
     password: "party2026",
   },
   {
     name: "Alex",
     role: "Full-stack Developer",
-    tag: "Pelamar Tim (Applicant)",
+    tagId: "Pelamar Tim",
+    tagEn: "Applicant",
     avatar: "💻",
-    password: "party2026",
-  },
-  {
-    name: "Sarah",
-    role: "Product Manager",
-    tag: "Scrum Master",
-    avatar: "📊",
     password: "party2026",
   },
   {
     name: "Admin",
     role: "Guild Master",
-    tag: "Moderator Panel",
+    tagId: "Panel Admin",
+    tagEn: "Admin Master",
     avatar: "👑",
     password: "admin",
   },
 ];
-
-const ROLE_THEME = {
-  hacker: { accent: "#22c55e", ring: "border-emerald-400", label: "Hacker" },
-  hipster: { accent: "#f97316", ring: "border-orange-400", label: "Hipster" },
-  hustler: { accent: "#38bdf8", ring: "border-sky-400", label: "Hustler" },
-  admin: { accent: "#facc15", ring: "border-yellow-400", label: "Guild Master" },
-};
-const DEFAULT_THEME = { accent: "#94a3b8", ring: "border-slate-400", label: "Adventurer" };
-
-function getRoleTheme(role) {
-  const key = (role || "").toLowerCase();
-  return ROLE_THEME[key] || DEFAULT_THEME;
-}
-
-function RoleAvatarIcon({ role, className = "" }) {
-  const key = (role || "").toLowerCase();
-
-  if (key === "admin") {
-    return (
-      <svg viewBox="0 0 24 24" className={className} style={{ imageRendering: "pixelated" }}>
-        <rect x="7" y="8" width="10" height="9" fill="#ffd8b0" />
-        <rect x="6" y="5" width="12" height="2.5" fill="#facc15" />
-        <rect x="6" y="2" width="2.5" height="3.5" fill="#facc15" />
-        <rect x="10.75" y="1" width="2.5" height="4.5" fill="#facc15" />
-        <rect x="15.5" y="2" width="2.5" height="3.5" fill="#facc15" />
-        <rect x="11" y="3" width="2" height="2" fill="#ef4444" />
-        <rect x="9.5" y="12" width="1.5" height="1.5" fill="#1b263b" />
-        <rect x="13" y="12" width="1.5" height="1.5" fill="#1b263b" />
-        <rect x="10" y="15" width="4" height="1" fill="#c2410c" opacity="0.7" />
-      </svg>
-    );
-  }
-
-  if (key === "hacker") {
-    return (
-      <svg viewBox="0 0 24 24" className={className} style={{ imageRendering: "pixelated" }}>
-        <rect x="5" y="3" width="14" height="8" fill="#1b263b" />
-        <rect x="7" y="8" width="10" height="8" fill="#ffd8b0" />
-        <rect x="8" y="10.5" width="8" height="2" fill="#22c55e" />
-        <rect x="9.5" y="14" width="5" height="1" fill="#c2410c" opacity="0.6" />
-      </svg>
-    );
-  }
-
-  if (key === "hipster") {
-    return (
-      <svg viewBox="0 0 24 24" className={className} style={{ imageRendering: "pixelated" }}>
-        <rect x="7" y="7" width="10" height="9" fill="#ffd8b0" />
-        <rect x="6" y="3" width="12" height="4.5" fill="#f97316" />
-        <rect x="6" y="7" width="12" height="1.5" fill="#fdba74" />
-        <rect x="8" y="10.5" width="3" height="3" fill="none" stroke="#1b263b" strokeWidth="1" />
-        <rect x="13" y="10.5" width="3" height="3" fill="none" stroke="#1b263b" strokeWidth="1" />
-        <rect x="11" y="11.5" width="2" height="1" fill="#1b263b" />
-        <rect x="9.5" y="14" width="5" height="1" fill="#c2410c" opacity="0.6" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg viewBox="0 0 24 24" className={className} style={{ imageRendering: "pixelated" }}>
-      <rect x="7" y="6.5" width="10" height="9" fill="#ffd8b0" />
-      <rect x="6" y="3" width="12" height="4" fill="#3b2415" />
-      <rect x="15" y="6" width="2" height="3" fill="#3b2415" />
-      <rect x="9.5" y="11" width="1.5" height="1.5" fill="#1b263b" />
-      <rect x="13" y="11" width="1.5" height="1.5" fill="#1b263b" />
-      <rect x="10.5" y="15.5" width="3" height="4" fill="#0f172a" />
-      <rect x="10.5" y="15.5" width="3" height="1.5" fill="#38bdf8" />
-    </svg>
-  );
-}
-
-// Menggunakan PixelAvatar yang sama persis dengan halaman Profile!
-function AccountAvatar({ account, className = "" }) {
-  return (
-    <div className={`flex items-center justify-center bg-retro-black ${className}`}>
-      <PixelAvatar role={account.role} size="w-full h-full" />
-    </div>
-  );
-}
 
 export default function Login() {
   const router = useRouter();
   const { lang } = useLanguage();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // State Toggle Ikon Mata
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [usersList, setUsersList] = useState(usersData);
+  const [showDemoSection, setShowDemoSection] = useState(false); // Terlipat rapi secara default
 
   const fullSpeechText =
     lang === "ID" ? "Masuk untuk melanjutkan perjalanan party-mu~" : "Log in to resume your party journey~";
   const [displayedSpeech, setDisplayedSpeech] = useState("");
 
-  // Sinkronisasi data user (mengambil akun bawaan + akun baru yang didaftarkan)
+  // Sinkronisasi data user lokal (membaca akun bawaan + akun baru yang dibuat)
   useEffect(() => {
     if (typeof window !== "undefined") {
       const stored = getStoredUsers();
@@ -143,7 +60,7 @@ export default function Login() {
     }
   }, []);
 
-  // Efek ketik ulang otomatis setiap kali bahasa di-toggle
+  // Animasi ketik ucapan maskot
   useEffect(() => {
     let index = 0;
     setDisplayedSpeech("");
@@ -159,6 +76,7 @@ export default function Login() {
     return () => clearInterval(typingTimer);
   }, [fullSpeechText]);
 
+  // Eksekusi Login (Mendukung Akun Baru Seperti Jeanne & Akun Admin)
   const handleLogin = (e) => {
     if (e) e.preventDefault();
     setError("");
@@ -171,7 +89,7 @@ export default function Login() {
       return;
     }
 
-    // Mencari user di daftar dinamis (nama atau user_id)
+    // Mencari user di database lokal berdasarkan nama atau user_id
     const matchedUser = usersList.find(
       (u) =>
         u.name.toLowerCase() === cleanUser ||
@@ -181,13 +99,13 @@ export default function Login() {
     if (!matchedUser) {
       setError(
         lang === "ID"
-          ? "ADVENTURER TIDAK DITEMUKAN DI DATABASE GUILD!"
-          : "ADVENTURER NOT FOUND IN GUILD DATABASE!"
+          ? "ADVENTURER TIDAK DITEMUKAN! PASTIKAN NAMA SUDAH SESUAI DENGAN YANG DIDAFTARKAN."
+          : "ADVENTURER NOT FOUND! PLEASE CHECK YOUR REGISTERED USERNAME."
       );
       return;
     }
 
-    // Password akun: mengambil dari objek user atau default
+    // Pengecekan Password Akun
     const expectedPassword = matchedUser.password || `${matchedUser.name.toLowerCase()}123`;
     if (cleanPass !== expectedPassword && cleanPass !== "party2026" && cleanPass !== "admin") {
       setError(
@@ -203,6 +121,7 @@ export default function Login() {
       localStorage.setItem("currentUser", JSON.stringify(matchedUser));
       window.dispatchEvent(new Event("auth-change"));
 
+      // Jika yang login adalah Admin (USR-000), otomatis lempar ke /admin
       if (matchedUser.role?.toLowerCase() === "admin" || matchedUser.user_id === "USR-000") {
         router.push("/admin");
       } else {
@@ -210,11 +129,11 @@ export default function Login() {
       }
     } catch (err) {
       console.error("Local storage error:", err);
-      setError(lang === "ID" ? "LOCAL STORAGE DIBLOKIR OLEH BROWSER!" : "LOCAL STORAGE BLOCKED BY BROWSER!");
+      setError(lang === "ID" ? "LOCAL STORAGE DIBLOKIR BROWSER!" : "LOCAL STORAGE BLOCKED BY BROWSER!");
     }
   };
 
-  // AUTO-FILL CEPAT SAAT KARTU DEMO DIKLIK JURI
+  // Auto-fill dari Kartu Demo Juri
   const handleSelectDemoPersona = (persona) => {
     const matched = usersList.find((u) => u.name.toLowerCase() === persona.name.toLowerCase());
     const pass = matched?.password || persona.password || "party2026";
@@ -232,7 +151,7 @@ export default function Login() {
   return (
     <div className="min-h-screen w-full bg-[#08091a] text-white flex flex-col items-center justify-center p-4 relative overflow-hidden select-none selection:bg-yellow-400 selection:text-black">
 
-      {/* Background Pixel Stars & GIF Latar Belakang */}
+      {/* Background Retro */}
       <div
         className="absolute inset-0 bg-cover bg-center opacity-70 z-0 pointer-events-none"
         style={{ backgroundImage: "url('/bglogin.png')" }}
@@ -242,73 +161,73 @@ export default function Login() {
       {/* Tombol Escape Kembali ke Home */}
       <Link
         href="/"
-        className="absolute top-6 left-6 z-20 font-pixel text-[9px] text-white hover:text-yellow-300 flex items-center gap-2 transition-colors border-2 border-retro-black px-3 py-1.5 bg-[#121b2d] shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px]"
+        className="absolute top-4 left-4 md:top-6 md:left-6 z-20 font-pixel text-[8.5px] text-white hover:text-yellow-300 flex items-center gap-1.5 transition-colors border-2 border-retro-black px-2.5 py-1 bg-[#121b2d] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:translate-y-[1px]"
       >
         {lang === "ID" ? "[← KEMBALI KE KOTA]" : "[← ESCAPE TO TOWN]"}
       </Link>
 
-      <div className="max-w-md w-full flex flex-col items-center gap-3 relative z-10 my-8">
+      <div className="max-w-md w-full flex flex-col items-center gap-2.5 relative z-10 my-4 md:my-6">
 
-        {/* Container Maskot & Speech Bubble */}
-        <div className="flex items-center gap-3 mb-2">
-          <div className="relative w-24 h-24 shrink-0">
+        {/* Maskot Pikachu & Balon Ucapan */}
+        <div className="flex items-center gap-2.5 mb-1">
+          <div className="relative w-16 h-16 md:w-20 md:h-20 shrink-0">
             <Image
               src="/Pikachu.gif"
               alt="Pikachu Mascot"
               fill
               unoptimized
               priority
-              className="object-contain drop-shadow-[2px_4px_0px_rgba(0,0,0,0.9)]"
+              className="object-contain drop-shadow-[2px_3px_0px_rgba(0,0,0,0.9)]"
             />
           </div>
 
-          <div className="relative bg-white text-retro-black font-pixel text-[10px] md:text-[11px] py-3 px-4 border-2 border-retro-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] w-[260px] h-[48px] flex items-center justify-start text-left shrink-0">
+          <div className="relative bg-white text-retro-black font-pixel text-[9px] md:text-[10px] py-2 px-3.5 border-2 border-retro-black rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] w-[240px] md:w-[260px] h-[42px] flex items-center justify-start text-left shrink-0">
             <span>
               {displayedSpeech}
               <span className="animate-pulse font-bold text-yellow-500">|</span>
             </span>
-            <div className="absolute top-1/2 -left-2 -translate-y-1/2 w-0 h-0 border-t-8 border-t-transparent border-r-8 border-r-white border-b-8 border-b-transparent" />
+            <div className="absolute top-1/2 -left-2 -translate-y-1/2 w-0 h-0 border-t-6 border-t-transparent border-r-6 border-r-white border-b-6 border-b-transparent" />
           </div>
         </div>
 
-        {/* LOGIN WHITE CARD CONTAINER */}
-        <div className="w-full bg-white text-retro-black border-4 border-retro-black rounded-2xl p-6 md:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-5 text-left">
+        {/* CARD CONTAINER UTAMA (BERSIH & PROFESIONAL) */}
+        <div className="w-full bg-white text-retro-black border-4 border-retro-black rounded-2xl p-5 md:p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-3.5 text-left">
 
           {error && (
-            <div className="bg-red-100 text-red-700 font-pixel text-[8px] p-2 border-2 border-red-600 text-center animate-shake">
+            <div className="bg-red-100 text-red-700 font-pixel text-[8px] p-2 border-2 border-red-600 text-center animate-shake rounded">
               [{lang === "ID" ? "PERINGATAN" : "WARNING"}: {error}]
             </div>
           )}
 
-          <div className="flex flex-col gap-4">
-            {/* Input Nama Petualang Bebas (Bisa akun lama & akun baru) */}
+          <div className="flex flex-col gap-3">
+            {/* Input Nama Petualang Asli */}
             <div className="flex flex-col gap-1">
-              <label className="font-pixel text-[8px] text-gray-600">
+              <label className="font-pixel text-[7.5px] text-gray-600">
                 {lang === "ID" ? "NAMA ADVENTURER / USERNAME" : "ADVENTURER NAME / USERNAME"}
               </label>
               <input
                 type="text"
                 required
-                placeholder={lang === "ID" ? "Ketik nama karakter (cth. Joice, Alex)..." : "Type adventurer name (e.g. Joice, Alex)..."}
+                placeholder={lang === "ID" ? "Masukkan nama karaktermu..." : "Enter character name..."}
                 value={username}
                 onKeyDown={handleKeyDown}
                 onChange={(e) => {
                   setUsername(e.target.value);
                   setError("");
                 }}
-                className="font-sans text-xs p-2.5 bg-slate-50 border-2 border-slate-300 rounded-lg focus:border-retro-black focus:outline-none"
+                className="font-sans text-xs p-2 bg-slate-50 border-2 border-slate-300 rounded-lg focus:border-retro-black focus:outline-none"
               />
             </div>
 
-            {/* Input Password dengan Toggle Ikon Mata Tetap Aktif */}
+            {/* Input Password */}
             <div className="flex flex-col gap-1">
-              <label className="font-pixel text-[8px] text-gray-600">
+              <label className="font-pixel text-[7.5px] text-gray-600">
                 {lang === "ID" ? "KUNCI KEAMANAN / PASSWORD" : "SECURITY KEY / PASSWORD"}
               </label>
               <div className="relative flex items-center">
                 <input
                   type={showPassword ? "text" : "password"}
-                  name="guild-demo-password"
+                  name="guild-password"
                   placeholder="••••••••"
                   value={password}
                   onKeyDown={handleKeyDown}
@@ -317,19 +236,14 @@ export default function Login() {
                     setError("");
                   }}
                   autoComplete="current-password"
-                  className="w-full font-sans text-xs p-2.5 pr-10 bg-slate-50 border-2 border-slate-300 rounded-lg focus:border-retro-black focus:outline-none"
+                  className="w-full font-sans text-xs p-2 pr-9 bg-slate-50 border-2 border-slate-300 rounded-lg focus:border-retro-black focus:outline-none"
                 />
 
-                {/* Tombol Ikon Mata */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2.5 p-1 text-gray-500 hover:text-retro-black cursor-pointer border-none bg-transparent transition-colors"
-                  title={
-                    showPassword
-                      ? (lang === "ID" ? "Sembunyikan Password" : "Hide Password")
-                      : (lang === "ID" ? "Tampilkan Password" : "Show Password")
-                  }
+                  className="absolute right-2 p-1 text-gray-500 hover:text-retro-black cursor-pointer border-none bg-transparent transition-colors"
+                  title={showPassword ? "Hide" : "Show"}
                 >
                   {showPassword ? (
                     <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
@@ -344,70 +258,90 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Tombol Primary Masuk (Sekarang Dinamis Berdasarkan Teks Input) */}
+            {/* Tombol Masuk */}
             <button
               type="button"
               onClick={handleLogin}
               disabled={!username.trim() || !password.trim()}
-              className="w-full font-pixel text-xs py-3 bg-navy-blue hover:bg-navy-light text-white font-bold border-2 border-retro-black rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer active:translate-y-[1px] transition-all mt-1 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-navy-blue"
+              className="w-full font-pixel text-xs py-2.5 bg-navy-blue hover:bg-navy-light text-white font-bold border-2 border-retro-black rounded-lg shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] cursor-pointer active:translate-y-[1px] transition-all mt-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-navy-blue"
             >
               {lang === "ID" ? "Masuk ▶" : "Log in ▶"}
             </button>
-
-            {/* ✦ BILAH PINTASAN PENGUJIAN JURI (1-CLICK AUTO-FILL) ✦ */}
-            <div className="border-t-2 border-dashed border-slate-200 pt-3 mt-1 flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <span className="font-pixel text-[7.5px] text-yellow-600 uppercase tracking-wider">
-                  {lang === "ID" ? "⚡ PINTASAN AKUN DEMO JURI:" : "⚡ JURY DEMO PERSONAS:"}
-                </span>
-                <span className="font-pixel text-[7px] bg-slate-100 text-slate-500 border border-slate-300 px-1.5 py-0.5 rounded">
-                  1-KLIK ISI
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
-                {DEMO_PERSONAS.map((persona) => (
-                  <button
-                    type="button"
-                    key={persona.name}
-                    onClick={() => handleSelectDemoPersona(persona)}
-                    className="flex flex-col items-center justify-center p-2 bg-slate-50 hover:bg-yellow-50 border-2 border-slate-300 hover:border-yellow-500 rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,0.06)] active:translate-y-[1px] group text-center"
-                  >
-                    <span className="text-base group-hover:scale-110 transition-transform">{persona.avatar}</span>
-                    <span className="font-pixel text-[8px] text-retro-black font-bold mt-0.5">{persona.name}</span>
-                    <span className="font-sans text-[7.5px] text-slate-400 truncate w-full">{persona.tag}</span>
-                  </button>
-                ))}
-              </div>
-              <p className="font-sans text-[9.5px] text-slate-400 text-center italic">
-                {lang === "ID"
-                  ? "*Klik salah satu kartu di atas untuk auto-fill data akun."
-                  : "*Click any card above to auto-fill account credentials."}
-              </p>
-            </div>
           </div>
 
-          {/* Sign Up & Reset Password Links */}
-          <div className="text-center border-t border-slate-200 pt-4 pb-1 flex flex-col relative z-20">
-            <p className="font-sans text-xs text-gray-500">
+          {/* Links Navigasi Standar */}
+          <div className="text-center border-t border-slate-200 pt-2.5 flex flex-col gap-1">
+            <p className="font-sans text-[11px] text-gray-500">
               {lang === "ID" ? "Belum punya akun?" : "Need an account?"}{" "}
               <Link
                 href="/register"
-                className="font-pixel text-[9px] text-navy-blue font-bold hover:underline pl-1 cursor-pointer inline-block relative z-20"
+                className="font-pixel text-[8.5px] text-navy-blue font-bold hover:underline pl-1 cursor-pointer inline-block"
               >
                 {lang === "ID" ? "Daftar >" : "Sign up >"}
               </Link>
             </p>
 
-            <p className="font-sans text-xs text-gray-500 mt-2.5">
+            <p className="font-sans text-[11px] text-gray-500">
               {lang === "ID" ? "Lupa kunci keamanan?" : "Lost security key?"}{" "}
               <Link
                 href="/forgot-password"
-                className="font-pixel text-[9px] text-navy-blue font-bold hover:underline pl-1 cursor-pointer inline-block relative z-20"
+                className="font-pixel text-[8.5px] text-navy-blue font-bold hover:underline pl-1 cursor-pointer inline-block"
               >
                 {lang === "ID" ? "Reset Password >" : "Reset Password >"}
               </Link>
             </p>
+          </div>
+
+          {/* ✦ PINTASAN PENGUJIAN JURI & ADMIN (ACCORDION RAPI / BISA DILIPAT) ✦ */}
+          <div className="border-t border-dashed border-slate-300 pt-2 flex flex-col gap-1.5">
+            <button
+              type="button"
+              onClick={() => setShowDemoSection(!showDemoSection)}
+              className="w-full flex items-center justify-between text-left font-pixel text-[7.5px] text-gray-600 hover:text-retro-black bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg border border-slate-300 cursor-pointer transition-colors"
+            >
+              <span className="flex items-center gap-1.5 text-yellow-700 font-bold">
+                <span>⚡</span>
+                <span>
+                  {lang === "ID" ? "AKSES PENGUJIAN JURI & ADMIN" : "JURY & ADMIN DEMO SHORTCUTS"}
+                </span>
+              </span>
+              <span className="text-[9px] text-slate-500 font-sans">
+                {showDemoSection ? "▲ Tutup" : "▼ Buka"}
+              </span>
+            </button>
+
+            {/* KONTEN DEMO HANYA MUNCUL KETIKA DIBUKA OLEH JURI */}
+            {showDemoSection && (
+              <div className="flex flex-col gap-1.5 pt-1 animate-in fade-in duration-150">
+                <div className="grid grid-cols-3 gap-1.5">
+                  {DEMO_PERSONAS.map((persona) => {
+                    const isSelected = username.toLowerCase() === persona.name.toLowerCase();
+                    return (
+                      <button
+                        type="button"
+                        key={persona.name}
+                        onClick={() => handleSelectDemoPersona(persona)}
+                        className={`flex flex-col items-center justify-center p-1.5 border-2 rounded-xl transition-all cursor-pointer shadow-[1px_1px_0px_0px_rgba(0,0,0,0.06)] active:translate-y-[1px] group text-center ${isSelected
+                            ? "bg-yellow-100/70 border-yellow-500"
+                            : "bg-slate-50 hover:bg-yellow-50 border-slate-300 hover:border-yellow-400"
+                          }`}
+                      >
+                        <span className="text-sm group-hover:scale-110 transition-transform">{persona.avatar}</span>
+                        <span className="font-pixel text-[8px] text-retro-black font-bold mt-0.5">{persona.name}</span>
+                        <span className="font-sans text-[7px] text-slate-500 truncate w-full">
+                          {lang === "ID" ? persona.tagId : persona.tagEn}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <p className="font-sans text-[9px] text-slate-400 text-center italic">
+                  {lang === "ID"
+                    ? "*Klik salah satu untuk mengisi akun dan menguji peran."
+                    : "*Click to auto-fill credentials and test role."}
+                </p>
+              </div>
+            )}
           </div>
 
         </div>
