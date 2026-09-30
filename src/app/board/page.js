@@ -34,6 +34,30 @@ const CLASSES = [
   "DevOps Engineer",
 ];
 
+const getProjectImage = (title = "", category = "", skills = "") => {
+  const text = (title + " " + category + " " + skills).toLowerCase();
+
+  if (text.includes("scholar") || text.includes("finance") || text.includes("figma") || text.includes("design") || text.includes("ui")) {
+    return "/project/scholarsave.png";
+  }
+  if (text.includes("eco") || text.includes("carbon") || text.includes("green") || text.includes("backend") || text.includes("python") || text.includes("go")) {
+    return "/project/EcoSphere.png";
+  }
+  if (text.includes("telemetry") || text.includes("health") || text.includes("flutter") || text.includes("mobile") || text.includes("medilink") || text.includes("bluetooth")) {
+    return "/project/telemetry.png";
+  }
+  if (text.includes("agile") || text.includes("edu") || text.includes("scrum") || text.includes("management") || text.includes("business") || text.includes("canvas")) {
+    return "/project/agile.png";
+  }
+  if (text.includes("cloud") || text.includes("devops") || text.includes("docker") || text.includes("ci/cd")) {
+    return "/project/cloud.png";
+  }
+  if (text.includes("micro") || text.includes("frontend") || text.includes("accessibility") || text.includes("tailwind")) {
+    return "/project/micro.png";
+  }
+  return "/project/scholarsave.png";
+};
+
 export default function Board() {
   const { lang, t } = useLanguage();
   const router = useRouter();
@@ -141,7 +165,7 @@ export default function Board() {
       description: newDescription.trim(),
       created_at: new Date().toISOString(),
       is_verified: true,
-      image: "/bg.png"
+      image: getProjectImage(newTitle, newCategory, newSkills)
     };
 
     // Simpan ke Supabase Cloud & LocalStorage
@@ -354,9 +378,20 @@ export default function Board() {
         {/* 3. QUEST CARDS 3-COLUMN RESPONSIVE GRID                   */}
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
           {filteredProjects.length > 0 ? (
-            filteredProjects.map((project) => (
-              <ProjectCard key={project.project_id || project.id} project={project} />
-            ))
+            filteredProjects.map((project) => {
+              // Jika project masih pakai gambar default /bg.png, otomatis tingkatkan ke gambar pixel art resmi
+              const finalImage =
+                project.image && project.image !== "/bg.png" && project.image !== "/computer.png"
+                  ? project.image
+                  : getProjectImage(project.title, project.category, (project.looking_for || []).join(" "));
+
+              return (
+                <ProjectCard
+                  key={project.project_id || project.id}
+                  project={{ ...project, image: finalImage }}
+                />
+              );
+            })
           ) : (
             <div className="col-span-full bg-[#121b2d] border-4 border-retro-black rounded-2xl shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] p-12 text-center flex flex-col items-center justify-center gap-4">
               <span className="font-pixel text-2xl text-yellow-400">? ? ?</span>
