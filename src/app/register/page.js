@@ -15,9 +15,11 @@ export default function Register() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [university, setUniversity] = useState("Universitas Indonesia");
-  const [major, setMajor] = useState("Informatics");
-  // PERBAIKAN: semester sekarang state dinamis (dulu di-hardcode 3 saat submit)
+  const [customUniversity, setCustomUniversity] = useState("");
+  const [major, setMajor] = useState("Informatics");          
+  const [customMajor, setCustomMajor] = useState("");           
   const [semester, setSemester] = useState(1);
+
   const [selectedRole, setSelectedRole] = useState("Full-stack Developer");
   const [skills, setSkills] = useState("");
   const [bio, setBio] = useState("");
@@ -54,17 +56,24 @@ export default function Register() {
         ? skills.split(",").map((s) => s.trim())
         : ["Next.js", "Figma"];
 
+      // Jika memilih "OTHER", gunakan teks ketikan manual user
+      const finalUniversity = university === "OTHER"
+        ? (customUniversity.trim() || (lang === "ID" ? "Universitas Lain" : "Other University"))
+        : university;
+
+      const finalMajor = major === "OTHER"
+        ? (customMajor.trim() || (lang === "ID" ? "Jurusan Lain" : "Other Major"))
+        : major;
+
       // Menyusun objek user baru sesuai struktur database dummy Anda
       const newUser = {
         user_id: `USR-${Math.floor(100 + Math.random() * 900)}`,
         name: name.trim(),
         password: password.trim() || `${name.trim().toLowerCase()}123`,
-        // PERBAIKAN: sebelumnya hardcode `semester: 3` — sekarang ambil dari
-        // pilihan dropdown user, fallback ke 1 kalau entah kenapa kosong.
         semester: Number(semester) || 1,
-        university,
-        major,
-        role: selectedRole, // Menyimpan pilihan kelas RPG
+        university: finalUniversity,
+        major: finalMajor,
+        role: selectedRole, 
         skills: skillsArray,
         bio:
           bio ||
@@ -272,6 +281,8 @@ export default function Register() {
 
               {/* University, Prodi & Semester — sekarang 3 kolom */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+
+                {/* 1. UNIVERSITAS / KAMPUS */}
                 <div className="flex flex-col gap-1">
                   <label className="font-pixel text-[8px] text-gray-600">
                     {lang === "ID" ? "GUILD (UNIVERSITAS)" : "GUILD (UNIVERSITY)"}
@@ -279,15 +290,43 @@ export default function Register() {
                   <select
                     value={university}
                     onChange={(e) => setUniversity(e.target.value)}
-                    className="font-sans text-xs p-2.5 bg-slate-50 border-2 border-slate-300 rounded-lg focus:border-retro-black focus:outline-none cursor-pointer"
+                    className="font-sans text-xs p-2.5 bg-slate-50 border-2 border-slate-300 rounded-lg focus:border-retro-black focus:outline-none cursor-pointer truncate"
                   >
-                    <option value="Universitas Indonesia">Universitas Indonesia</option>
-                    <option value="ITB">ITB</option>
-                    <option value="UGM">UGM</option>
+                    <option value="Universitas Indonesia">Universitas Indonesia (UI)</option>
+                    <option value="ITB">Institut Teknologi Bandung (ITB)</option>
+                    <option value="UGM">Universitas Gadjah Mada (UGM)</option>
+                    <option value="ITS">Institut Teknologi Sepuluh Nopember (ITS)</option>
+                    <option value="Telkom University">Telkom University</option>
                     <option value="Binus University">Binus University</option>
-                    <option value="Universitas Airlangga">Universitas Airlangga</option>
+                    <option value="Universitas Brawijaya">Universitas Brawijaya (UB)</option>
+                    <option value="Universitas Airlangga">Universitas Airlangga (UNAIR)</option>
+                    <option value="Universitas Diponegoro">Universitas Diponegoro (UNDIP)</option>
+                    <option value="Universitas Padjadjaran">Universitas Padjadjaran (UNPAD)</option>
+                    <option value="Universitas Sebelas Maret">Universitas Sebelas Maret (UNS)</option>
+                    <option value="IPB University">IPB University</option>
+                    <option value="Universitas Udayana">Universitas Udayana (UNUD)</option>
+                    <option value="Universitas Multimedia Nusantara">Univ. Multimedia Nusantara (UMN)</option>
+                    <option value="IT DEL">Institut Teknologi Del</option>
+                    <option value="President University">President University</option>
+                    <option value="OTHER">
+                      {lang === "ID" ? "✏️ Lainnya (Ketik Manual)..." : "✏️ Other (Type Manually)..."}
+                    </option>
                   </select>
+
+                  {/* Input Muncul Jika Memilih "OTHER" */}
+                  {university === "OTHER" && (
+                    <input
+                      type="text"
+                      required
+                      placeholder={lang === "ID" ? "Ketik nama universitas..." : "Type your university..."}
+                      value={customUniversity}
+                      onChange={(e) => setCustomUniversity(e.target.value)}
+                      className="font-sans text-xs p-2 bg-yellow-50 border-2 border-yellow-400 rounded-lg focus:outline-none mt-1 animate-in fade-in"
+                    />
+                  )}
                 </div>
+
+                {/* 2. PRODI / JURUSAN */}
                 <div className="flex flex-col gap-1">
                   <label className="font-pixel text-[8px] text-gray-600">
                     {lang === "ID" ? "PRODI (JURUSAN)" : "MAJOR (PRODI)"}
@@ -295,15 +334,43 @@ export default function Register() {
                   <select
                     value={major}
                     onChange={(e) => setMajor(e.target.value)}
-                    className="font-sans text-xs p-2.5 bg-slate-50 border-2 border-slate-300 rounded-lg focus:border-retro-black focus:outline-none cursor-pointer"
+                    className="font-sans text-xs p-2.5 bg-slate-50 border-2 border-slate-300 rounded-lg focus:border-retro-black focus:outline-none cursor-pointer truncate"
                   >
-                    <option value="Informatics">Informatics</option>
-                    <option value="Information Systems">Information Systems</option>
-                    <option value="Computer Science">Computer Science</option>
-                    <option value="Business Management">Business Management</option>
+                    <option value="Informatics">Informatics / Teknik Informatika</option>
+                    <option value="Information Systems">Information Systems / Sistem Informasi</option>
+                    <option value="Computer Science">Computer Science / Ilmu Komputer</option>
+                    <option value="Software Engineering">Software Engineering / RPL</option>
+                    <option value="Data Science">Data Science / Sains Data</option>
+                    <option value="Artificial Intelligence">Artificial Intelligence / Kecerdasan Buatan</option>
+                    <option value="Cyber Security">Cyber Security / Keamanan Siber</option>
+                    <option value="Visual Communication Design">DKV / Visual Communication Design</option>
+                    <option value="UI/UX Design">UI/UX &amp; Interactive Design</option>
+                    <option value="Information Technology">Information Technology / Tek. Informasi</option>
+                    <option value="Electrical Engineering">Electrical Engineering / Tek. Elektro</option>
+                    <option value="Industrial Engineering">Industrial Engineering / Tek. Industri</option>
+                    <option value="Digital Business">Digital Business / Bisnis Digital</option>
+                    <option value="Business Management">Business Management / Manajemen</option>
+                    <option value="Computer Engineering">Computer Engineering / Tek. Komputer</option>
+                    <option value="Communication Science">Communication Science / Ilmu Komunikasi</option>
+                    <option value="OTHER">
+                      {lang === "ID" ? "✏️ Lainnya (Ketik Manual)..." : "✏️ Other (Type Manually)..."}
+                    </option>
                   </select>
+
+                  {/* Input Muncul Jika Memilih "OTHER" */}
+                  {major === "OTHER" && (
+                    <input
+                      type="text"
+                      required
+                      placeholder={lang === "ID" ? "Ketik nama jurusan/prodi..." : "Type your major..."}
+                      value={customMajor}
+                      onChange={(e) => setCustomMajor(e.target.value)}
+                      className="font-sans text-xs p-2 bg-yellow-50 border-2 border-yellow-400 rounded-lg focus:outline-none mt-1 animate-in fade-in"
+                    />
+                  )}
                 </div>
-                {/* PERBAIKAN: dropdown Semester baru, sejajar University & Major */}
+
+                {/* 3. SEMESTER */}
                 <div className="flex flex-col gap-1">
                   <label className="font-pixel text-[8px] text-gray-600">
                     {lang === "ID" ? "SEMESTER" : "SEMESTER"}

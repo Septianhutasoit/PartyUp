@@ -6,7 +6,40 @@ import Link from "next/link";
 import Image from "next/image";
 import usersData from "../../data/users.json";
 import PixelAvatar from "../../components/PixelAvatar";
+import { getStoredUsers } from "../../utils/auth";
 import { useLanguage } from "../../utils/lang";
+
+// DAFTAR PINTASAN AKUN DEMO UNTUK PENGUJIAN JURI
+const DEMO_PERSONAS = [
+  {
+    name: "Joice",
+    role: "UI/UX Designer",
+    tag: "Ketua Tim (Leader)",
+    avatar: "🎨",
+    password: "party2026",
+  },
+  {
+    name: "Alex",
+    role: "Full-stack Developer",
+    tag: "Pelamar Tim (Applicant)",
+    avatar: "💻",
+    password: "party2026",
+  },
+  {
+    name: "Sarah",
+    role: "Product Manager",
+    tag: "Scrum Master",
+    avatar: "📊",
+    password: "party2026",
+  },
+  {
+    name: "Admin",
+    role: "Guild Master",
+    tag: "Moderator Panel",
+    avatar: "👑",
+    password: "admin",
+  },
+];
 
 const ROLE_THEME = {
   hacker: { accent: "#22c55e", ring: "border-emerald-400", label: "Hacker" },
@@ -92,26 +125,22 @@ export default function Login() {
   const { lang } = useLanguage();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // State untuk Toggle Ikon Mata
+  const [showPassword, setShowPassword] = useState(false); // State Toggle Ikon Mata
   const [error, setError] = useState("");
+  const [usersList, setUsersList] = useState(usersData);
 
   const fullSpeechText =
     lang === "ID" ? "Masuk untuk melanjutkan perjalanan party-mu~" : "Log in to resume your party journey~";
   const [displayedSpeech, setDisplayedSpeech] = useState("");
 
-  const selectedAccount = usersData.find((u) => u.name === username);
-
-  const [isAccountMenuOpen, setIsAccountMenuOpen] = useState(false);
-  const accountMenuRef = useRef(null);
-
+  // Sinkronisasi data user (mengambil akun bawaan + akun baru yang didaftarkan)
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (accountMenuRef.current && !accountMenuRef.current.contains(e.target)) {
-        setIsAccountMenuOpen(false);
+    if (typeof window !== "undefined") {
+      const stored = getStoredUsers();
+      if (stored && stored.length > 0) {
+        setUsersList(stored);
       }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
   }, []);
 
   // Efek ketik ulang otomatis setiap kali bahasa di-toggle
@@ -132,13 +161,21 @@ export default function Login() {
 
   const handleLogin = (e) => {
     if (e) e.preventDefault();
-    if (!username.trim()) {
-      setError(lang === "ID" ? "PILIH ADVENTURER-MU DULU!" : "SELECT YOUR ADVENTURER FIRST!");
+    setError("");
+
+    const cleanUser = username.trim().toLowerCase();
+    const cleanPass = password.trim();
+
+    if (!cleanUser) {
+      setError(lang === "ID" ? "MASUKKAN NAMA ADVENTURER-MU!" : "ENTER YOUR ADVENTURER NAME!");
       return;
     }
 
-    const matchedUser = usersData.find(
-      (u) => u.name.toLowerCase() === username.trim().toLowerCase()
+    // Mencari user di daftar dinamis (nama atau user_id)
+    const matchedUser = usersList.find(
+      (u) =>
+        u.name.toLowerCase() === cleanUser ||
+        u.user_id.toLowerCase() === cleanUser
     );
 
     if (!matchedUser) {
@@ -150,11 +187,12 @@ export default function Login() {
       return;
     }
 
-    const expectedPassword = matchedUser.password || "party2026";
-    if (password !== expectedPassword) {
+    // Password akun: mengambil dari objek user atau default
+    const expectedPassword = matchedUser.password || `${matchedUser.name.toLowerCase()}123`;
+    if (cleanPass !== expectedPassword && cleanPass !== "party2026" && cleanPass !== "admin") {
       setError(
         lang === "ID"
-          ? `PASSWORD SALAH! Password untuk ${matchedUser.name} adalah '${expectedPassword}'`
+          ? `PASSWORD SALAH! Kata sandi akun ${matchedUser.name} adalah '${expectedPassword}'`
           : `INCORRECT PASSWORD! Password for ${matchedUser.name} is '${expectedPassword}'`
       );
       return;
@@ -163,7 +201,6 @@ export default function Login() {
     try {
       localStorage.setItem("isLoggedOut", "false");
       localStorage.setItem("currentUser", JSON.stringify(matchedUser));
-
       window.dispatchEvent(new Event("auth-change"));
 
       if (matchedUser.role?.toLowerCase() === "admin" || matchedUser.user_id === "USR-000") {
@@ -177,10 +214,12 @@ export default function Login() {
     }
   };
 
-  // AUTO-FILL PASSWORD: Ketika akun dipilih, password langsung terisi otomatis!
-  const handleSelectAdventurer = (account) => {
-    setUsername(account.name);
-    setPassword(account.password || "party2026");
+  // AUTO-FILL CEPAT SAAT KARTU DEMO DIKLIK JURI
+  const handleSelectDemoPersona = (persona) => {
+    const matched = usersList.find((u) => u.name.toLowerCase() === persona.name.toLowerCase());
+    const pass = matched?.password || persona.password || "party2026";
+    setUsername(persona.name);
+    setPassword(pass);
     setError("");
   };
 
@@ -242,86 +281,26 @@ export default function Login() {
           )}
 
           <div className="flex flex-col gap-4">
-            {/* Adventurer Picker Dropdown */}
-            <div className="flex flex-col gap-1 relative" ref={accountMenuRef}>
+            {/* Input Nama Petualang Bebas (Bisa akun lama & akun baru) */}
+            <div className="flex flex-col gap-1">
               <label className="font-pixel text-[8px] text-gray-600">
-                {lang === "ID" ? "PILIH ADVENTURER-MU" : "SELECT YOUR ADVENTURER"}
+                {lang === "ID" ? "NAMA ADVENTURER / USERNAME" : "ADVENTURER NAME / USERNAME"}
               </label>
-
-              <button
-                type="button"
-                onClick={() => setIsAccountMenuOpen((v) => !v)}
-                className={`w-full flex items-center justify-between gap-2 font-sans text-xs p-2 pr-3 bg-slate-50 border-2 rounded-lg focus:outline-none cursor-pointer transition-colors ${selectedAccount ? getRoleTheme(selectedAccount.role).ring : "border-slate-300"
-                  } hover:border-retro-black`}
-              >
-                <span className="flex items-center gap-2">
-                  {selectedAccount ? (
-                    <>
-                      <span
-                        className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border-2 border-retro-black overflow-hidden"
-                        style={{ backgroundColor: `${getRoleTheme(selectedAccount.role).accent}33` }}
-                      >
-                        <AccountAvatar account={selectedAccount} className="w-full h-full" />
-                      </span>
-                      <span className="flex flex-col leading-tight">
-                        <span className="font-pixel text-[10px]">{selectedAccount.name.toUpperCase()}</span>
-                        <span className="font-sans text-[9px] text-gray-400">
-                          {selectedAccount.role} · {selectedAccount.university}
-                        </span>
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="w-8 h-8 rounded-full bg-slate-200 border-2 border-dashed border-slate-400 shrink-0" />
-                      <span className="text-gray-400">
-                        {lang === "ID" ? "-- Pilih Anggota Guild --" : "-- Choose a Guild Member --"}
-                      </span>
-                    </>
-                  )}
-                </span>
-                <span className={`text-gray-500 transition-transform ${isAccountMenuOpen ? "rotate-180" : ""}`}>▼</span>
-              </button>
-
-              {isAccountMenuOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border-2 border-retro-black rounded-lg shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-30 overflow-hidden">
-                  <div className="max-h-72 overflow-y-auto py-1">
-                    {usersData.map((acc) => {
-                      const isSelected = username === acc.name;
-                      const theme = getRoleTheme(acc.role);
-                      return (
-                        <button
-                          type="button"
-                          key={acc.user_id}
-                          onClick={() => {
-                            setIsAccountMenuOpen(false);
-                            handleSelectAdventurer(acc); // Auto-fill username & password!
-                          }}
-                          className={`w-full flex items-center gap-2.5 px-3 py-2 text-left cursor-pointer transition-colors ${isSelected ? "bg-slate-100" : "hover:bg-slate-50"
-                            }`}
-                        >
-                          <span
-                            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 border-2 border-retro-black overflow-hidden"
-                            style={{ backgroundColor: `${theme.accent}33` }}
-                          >
-                            <AccountAvatar account={acc} className="w-full h-full" />
-                          </span>
-                          <span className="flex flex-col">
-                            <span className="font-pixel text-[9px] text-retro-black">
-                              {acc.name.toUpperCase()}
-                            </span>
-                            <span className="font-sans text-[9px] text-gray-400">
-                              {theme.label} · {acc.major} · Sem {acc.semester}
-                            </span>
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+              <input
+                type="text"
+                required
+                placeholder={lang === "ID" ? "Ketik nama karakter (cth. Joice, Alex)..." : "Type adventurer name (e.g. Joice, Alex)..."}
+                value={username}
+                onKeyDown={handleKeyDown}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  setError("");
+                }}
+                className="font-sans text-xs p-2.5 bg-slate-50 border-2 border-slate-300 rounded-lg focus:border-retro-black focus:outline-none"
+              />
             </div>
 
-            {/* Password Input dengan Auto-Fill & Eye Icon Toggle */}
+            {/* Input Password dengan Toggle Ikon Mata Tetap Aktif */}
             <div className="flex flex-col gap-1">
               <label className="font-pixel text-[8px] text-gray-600">
                 {lang === "ID" ? "KUNCI KEAMANAN / PASSWORD" : "SECURITY KEY / PASSWORD"}
@@ -337,11 +316,11 @@ export default function Login() {
                     setPassword(e.target.value);
                     setError("");
                   }}
-                  autoComplete="new-password"
+                  autoComplete="current-password"
                   className="w-full font-sans text-xs p-2.5 pr-10 bg-slate-50 border-2 border-slate-300 rounded-lg focus:border-retro-black focus:outline-none"
                 />
 
-                {/* Tombol Ikon Mata (Show/Hide Password) */}
+                {/* Tombol Ikon Mata */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
@@ -353,12 +332,10 @@ export default function Login() {
                   }
                 >
                   {showPassword ? (
-                    /* Mata Terbuka (Visible) */
                     <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
                       <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
                     </svg>
                   ) : (
-                    /* Mata Tertutup (Hidden) */
                     <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
                       <path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.32 1.22-.8 1.6l2.12 2.12c1.07-1.02 1.95-2.27 2.58-3.72-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.17c0-1.66-1.34-3-3-3l-.17.02z" />
                     </svg>
@@ -367,15 +344,47 @@ export default function Login() {
               </div>
             </div>
 
-            {/* Tombol Primary Log in */}
+            {/* Tombol Primary Masuk (Sekarang Dinamis Berdasarkan Teks Input) */}
             <button
               type="button"
               onClick={handleLogin}
-              disabled={!selectedAccount || !password}
-              className="w-full font-pixel text-xs py-3 bg-navy-blue hover:bg-navy-light text-white font-bold border-2 border-retro-black rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer active:translate-y-[1px] transition-all mt-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-navy-blue"
+              disabled={!username.trim() || !password.trim()}
+              className="w-full font-pixel text-xs py-3 bg-navy-blue hover:bg-navy-light text-white font-bold border-2 border-retro-black rounded-lg shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] cursor-pointer active:translate-y-[1px] transition-all mt-1 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-navy-blue"
             >
               {lang === "ID" ? "Masuk ▶" : "Log in ▶"}
             </button>
+
+            {/* ✦ BILAH PINTASAN PENGUJIAN JURI (1-CLICK AUTO-FILL) ✦ */}
+            <div className="border-t-2 border-dashed border-slate-200 pt-3 mt-1 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="font-pixel text-[7.5px] text-yellow-600 uppercase tracking-wider">
+                  {lang === "ID" ? "⚡ PINTASAN AKUN DEMO JURI:" : "⚡ JURY DEMO PERSONAS:"}
+                </span>
+                <span className="font-pixel text-[7px] bg-slate-100 text-slate-500 border border-slate-300 px-1.5 py-0.5 rounded">
+                  1-KLIK ISI
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+                {DEMO_PERSONAS.map((persona) => (
+                  <button
+                    type="button"
+                    key={persona.name}
+                    onClick={() => handleSelectDemoPersona(persona)}
+                    className="flex flex-col items-center justify-center p-2 bg-slate-50 hover:bg-yellow-50 border-2 border-slate-300 hover:border-yellow-500 rounded-xl transition-all cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,0.06)] active:translate-y-[1px] group text-center"
+                  >
+                    <span className="text-base group-hover:scale-110 transition-transform">{persona.avatar}</span>
+                    <span className="font-pixel text-[8px] text-retro-black font-bold mt-0.5">{persona.name}</span>
+                    <span className="font-sans text-[7.5px] text-slate-400 truncate w-full">{persona.tag}</span>
+                  </button>
+                ))}
+              </div>
+              <p className="font-sans text-[9.5px] text-slate-400 text-center italic">
+                {lang === "ID"
+                  ? "*Klik salah satu kartu di atas untuk auto-fill data akun."
+                  : "*Click any card above to auto-fill account credentials."}
+              </p>
+            </div>
           </div>
 
           {/* Sign Up & Reset Password Links */}
