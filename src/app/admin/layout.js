@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser, triggerAuthChange } from "../../utils/auth";
 import PixelButton from "../../components/PixelButton";
+import AdminNotifications from "@/components/AdminNotifications";
 const SIDEBAR_BG = "bg-[#0E2A22]";
 const SIDEBAR_BORDER = "border-[#1D4A3B]";
 const SIDEBAR_PANEL = "bg-white/[0.06]";
@@ -369,14 +370,7 @@ export default function AdminLayout({ children }) {
                             <PixelIcon rows={ICONS.help} className="w-3.5 h-3.5" />
                         </Link>
 
-                        <button
-                            type="button"
-                            title="Notifications"
-                            className="relative w-8 h-8 rounded-lg bg-white/[0.06] hover:bg-white/[0.12] text-retro-gray hover:text-white flex items-center justify-center transition-all cursor-pointer"
-                        >
-                            <PixelIcon rows={ICONS.broadcast} className="w-3.5 h-3.5" />
-                            <span className="absolute top-1 right-1.5 w-1.5 h-1.5 rounded-full bg-red-500 border border-[#0b1220]" />
-                        </button>
+                        <AdminNotifications />
 
                         <div className="w-px h-6 bg-[#1D4A3B] mx-1 hidden sm:block" />
 
